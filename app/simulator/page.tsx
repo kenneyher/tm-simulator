@@ -8,8 +8,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { TransitionTable, Transition } from "@/lib/types"
-import { NEXT_REWRITTEN_QUERY_HEADER } from "next/dist/client/components/app-router-headers"
+import { TransitionTable, Transition, Move as Direction } from "@/lib/types"
 
 type SimulationStatus =
   | "IDLE"
@@ -259,33 +258,33 @@ export default function Simulator() {
     console.log(status)
     switch (status) {
       case "HALT":
-        return "bg-halted"
+        return "border-halted text-halted"
       case "RUNNING":
-        return "bg-running"
+        return "border-running text-running"
       case "REJECT":
-        return "bg-rejected"
-      case "VALIDATED":
-        return "bg-validated"
+        return "border-rejected text-rejected"
+      case "VALIDATED": 
+        return "border-validated text-validated"
       case "IDLE":
-        return "bg-idle"
+        return "border-idle text-idle"
       case "ERROR":
-        return "bg-error"
+        return "border-error text-error"
       default:
-        return "bg-background"
+        return "border-background text-background"
     }
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 font-mono text-gray-800 dark:text-gray-200 items-center justify-center w-screen">
-      <main className="flex z-10 w-full max-w-7xl flex-col items-center justify-center p-4">
-        <h1 className="max-w-7xl w-full text-3xl p-4 bg-indigo-600 text-white font-extrabold rounded-t-lg shadow-xl">
-          Turing Machine Simulator
+    <div className="font-geist-mono flex min-h-screen bg-background font-mono text-foreground items-center justify-center w-screen">
+      <main className="flex z-10 w-full max-w-7xl flex-col rounded-[0.1em] items-center justify-center p-4">
+        <h1 className="max-w-7xl w-full text-center text-2xl p-4 bg-accent text-white font-extrabold rounded-t-[0.1em] shadow-xl">
+          2-RNG: Universal Turing Machine Simulator
         </h1>
 
         {/* Status Indicator and Tape Display */}
-        <div className="w-full bg-white dark:bg-gray-800 p-6 shadow-xl mb-6 flex flex-col items-center rounded-b-lg">
+        <div className="w-full border-2 border-accent p-6 mb-6 flex flex-col items-center rounded-b-[0.1em]">
           <div
-            className={`p-2 px-4 rounded-full text-sm font-bold shadow-md text-white ${getStatusClass(
+            className={`p-2 px-4 border-2 rounded-[0.2em] text-sm font-bold shadow-md ${getStatusClass(
               simState.status
             )}`}
           >
@@ -294,15 +293,15 @@ export default function Simulator() {
           </div>
 
           <h2 className="text-xl font-bold mt-4 mb-2">TAPE</h2>
-          <div className="flex overflow-x-auto p-2 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-inner max-w-full">
+          <div className="flex items-center overflow-x-auto p-2 border-2 border-accent h-20 max-h-20 rounded-none shadow-inner w-full">
             {simState.currentTape.map((symbol, index) => (
               <div
                 key={index}
-                className={`p-3 mx-1 text-lg font-bold w-10 text-center rounded-md transition-all duration-150 ease-in-out
+                className={`p-3 py-4 mx-1 text-lg font-bold w-12 text-center rounded-none shadow-[0_0_0.25em] shadow-accent transition-all duration-150 ease-in-out
                             ${
                               index === simState.headPosition
-                                ? "bg-yellow-400 text-gray-900 border-2 border-yellow-600 scale-110 shadow-lg"
-                                : "bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600"
+                                ? "bg-accent text-white text-shadow-[0_0_0.2em] text-shadow-white"
+                                : "border-accent border-2 text-accent text-shadow-[0_0_0.2em] text-shadow-primary"
                             }`}
               >
                 {symbol}
@@ -310,7 +309,7 @@ export default function Simulator() {
             ))}
           </div>
           {simState.status === "ERROR" && validationError && (
-            <p className="mt-4 p-2 bg-red-100 text-red-700 border border-red-400 rounded-md font-semibold w-full text-center">
+            <p className="mt-4 p-2 bg-red-500 text-white text-shadow-[0_0_0.2em] text-shadow-white rounded-none shadow-md shadow-red-400 font-semibold w-full text-center">
               {validationError}
             </p>
           )}
@@ -318,13 +317,13 @@ export default function Simulator() {
 
         <div className="max-w-7xl w-full grid md:grid-cols-4 grid-cols-1 gap-6">
           {/* SIMULATION CONTROLS */}
-          <div className="md:col-span-1 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
+          <div className="md:col-span-1 p-4 border-2 border-accent rounded-[0.2em] shadow-lg shadow-accent">
+            <h2 className="text-xl text-accent text-shadow-[0_0_0.5em] text-shadow-accent font-bold mb-4 pb-2 ">
               Simulation Controls
             </h2>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-foreground">
                 Initial Input Tape
               </label>
               <Input
@@ -339,7 +338,7 @@ export default function Simulator() {
                 disabled={simState.status === "RUNNING"}
                 className="uppercase"
               />
-              <p className="text-xs mt-1 text-gray-500">
+              <p className="text-xs mt-1 text-foreground">
                 Only use symbols from the tape symbols.
               </p>
             </div>
@@ -409,8 +408,8 @@ export default function Simulator() {
           </div>
 
           {/* STATES MANAGEMENT */}
-          <div className="md:col-span-1 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
+          <div className="md:col-span-1 p-4 bg-background border-2 shadow-lg shadow-accent border-accent rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4 text-shadow-[0_0_0.5em] text-shadow-accent pb-2 text-accent">
               States & Alphabet
             </h2>
 
@@ -482,7 +481,7 @@ export default function Simulator() {
               <p className="text-sm font-medium mb-1">
                 Input Symbols (excluding Blank: **{BLANK_SYMBOL}**)
               </p>
-              <div className="max-h-20 overflow-y-auto pr-2">
+              <div className="max-h-100% overflow-y-auto pr-2">
                 {symbols.map((symbol, index) => (
                   <div key={index} className="flex flex-row items-center mb-2">
                     <Input
@@ -521,7 +520,7 @@ export default function Simulator() {
           </div>
 
           {/* TRANSITION TABLE */}
-          <div className="md:col-span-2 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg overflow-x-auto min-w-0">
+          <div className="md:col-span-2 p-4 border-2 border-accent rounded-lg shadow-accent shadow-lg overflow-x-auto min-w-0">
             <h2 className="text-xl font-bold mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
               Transition Table $\delta(q, a)$
             </h2>
@@ -529,7 +528,7 @@ export default function Simulator() {
             <div className="overflow-x-auto pb-4">
               <table className="w-full table-auto border-collapse border border-gray-500 dark:border-gray-600">
                 <thead>
-                  <tr className="bg-gray-100 dark:bg-gray-700">
+                  <tr>
                     <th className="border border-gray-500 p-2 min-w-[100px] text-center">
                       State / Symbol
                     </th>
@@ -547,9 +546,9 @@ export default function Simulator() {
                   {allSymbols.map((symbol) => (
                     <tr
                       key={symbol}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                      className="hover:bg-muted"
                     >
-                      <td className="border border-gray-500 p-2 text-center font-bold bg-gray-50 dark:bg-gray-700">
+                      <td className="border border-gray-500 p-2 text-center font-bold">
                         {symbol === BLANK_SYMBOL
                           ? `BLANK (${BLANK_SYMBOL})`
                           : symbol}
@@ -629,7 +628,7 @@ export default function Simulator() {
                     </tr>
                   ))}
                   {/* Terminal States Row - No transitions needed from these */}
-                  <tr className="bg-gray-200 dark:bg-gray-700/70 font-semibold">
+                  <tr className="font-semibold">
                     <td className="border border-gray-500 p-2 text-center">
                       Halted States
                     </td>
