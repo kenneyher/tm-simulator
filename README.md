@@ -52,9 +52,3 @@ npm run start
 - The Turing machine implementation is in `lib/machine.tsx` and is intentionally small so you can modify or extend the model easily.
 - UI components are in `components/` and `components/ui/`.
 
-If you plan to contribute, open a branch, make changes, and submit a pull request. Run `npm run lint` before submitting.
-
-## License
-This repository does not specify a license. Add a `LICENSE` file if you want to make the project open-source.
-
-Enjoy experimenting with Turing machines! If you want, I can add example machine definitions or a short tutorial page inside the app.
