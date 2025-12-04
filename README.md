@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Turing Machine Simulator
 
-## Getting Started
+A small interactive Turing Machine simulator built with Next.js and React.
 
-First, run the development server:
+Use this project to design, run and visualise Turing machines in the browser. It provides a UI for creating states and transition rules, editing the tape, and stepping or running the machine to observe how the tape and head position change over time.
+
+**Where to look in the codebase**
+- `app/simulator/page.tsx`: the simulator page and entry point for the UI.
+- `lib/machine.tsx`: core Turing machine model and execution logic.
+- `components/`: UI building blocks used by the simulator.
+
+## Quick Start
+
+Prerequisites:
+- Node.js 18 or newer
+- npm (bundled with Node) or another package manager
+
+Install dependencies and run the dev server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the simulator in your browser at:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000/simulator
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Available npm scripts (from `package.json`):
+- `npm run dev` — run the development server (Next.js)
+- `npm run build` — build the production bundle
+- `npm run start` — start the production server after building
+- `npm run lint` — run ESLint
 
-## Learn More
+To build and run a production instance locally:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage (UI overview)
+- Create states and transition rules using the simulator UI.
+- Edit the tape contents and set the initial head position.
+- Use the step controls to advance one transition at a time or run continuously.
+- Reset the machine to the initial configuration to try different inputs.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development notes
+- This is a Next.js (app router) + TypeScript project. Files under `app/` use the Next 13+ app router conventions.
+- The Turing machine implementation is in `lib/machine.tsx` and is intentionally small so you can modify or extend the model easily.
+- UI components are in `components/` and `components/ui/`.
 
-## Deploy on Vercel
+If you plan to contribute, open a branch, make changes, and submit a pull request. Run `npm run lint` before submitting.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
+This repository does not specify a license. Add a `LICENSE` file if you want to make the project open-source.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Enjoy experimenting with Turing machines! If you want, I can add example machine definitions or a short tutorial page inside the app.
