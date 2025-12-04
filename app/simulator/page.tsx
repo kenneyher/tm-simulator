@@ -13,7 +13,7 @@ import { TransitionTable, Transition, Move as Direction } from "@/lib/types"
 type SimulationStatus =
   | "IDLE"
   | "RUNNING"
-  | "HALT"
+  | "ACCEPTED"
   | "REJECT"
   | "ERROR"
   | "VALIDATED"
@@ -30,10 +30,15 @@ interface Simulation {
 export default function Simulator() {
   const BLANK_SYMBOL = "_"
 
-  let [states, setStates] = useState<string[]>(["q0", "q1", "halt", "reject"])
+  let [states, setStates] = useState<string[]>([
+    "q0",
+    "q1",
+    "accept",
+    "reject",
+  ])
   const [initialState, setInitialState] = useState<string>(states[0])
   let [symbols, setSymbols] = useState<string[]>(["0", "1"])
-  const accepted = "halt"
+  const accepted = "accept"
   const rejected = "reject"
 
   const allStates = useMemo(
@@ -79,11 +84,11 @@ export default function Simulator() {
           },
         },
       }))
-      setValidationError(null) // Clear validation on exit
+      setValidationError(null)
       setSimState((prev) => ({
         ...prev,
         status: "IDLE",
-      })) // Reset simulation status
+      }))
     },
     [transitionTable]
   )
@@ -142,9 +147,7 @@ export default function Simulator() {
 
   // -- SIMULATION LOGIC --
   const prepareTape = (input: string) => {
-    // trim leading/trailing blanks if any
     const trimmedInput = input.trim()
-    // start with a blank and the input and some blanks
     const tape = [
       BLANK_SYMBOL,
       ...trimmedInput.split(""),
@@ -205,7 +208,7 @@ export default function Simulator() {
 
       let newStatus: SimulationStatus = "RUNNING"
       if (nextState == accepted) {
-        newStatus = "HALT"
+        newStatus = "ACCEPTED"
       } else if (nextState == rejected) {
         newStatus = "REJECT"
       }
@@ -225,8 +228,6 @@ export default function Simulator() {
     if (simState.status == "RUNNING" && simState.speed > 0) {
       console.log("RUNNING")
       timer = setInterval(() => {
-        // Call stepSimulation directly. stepSimulation uses setSimState(prev => ...)
-        // which ensures it reads the latest state and updates it atomically.
         stepSimulation()
       }, simState.speed)
     }
@@ -257,13 +258,13 @@ export default function Simulator() {
   const getStatusClass = (status: SimulationStatus) => {
     console.log(status)
     switch (status) {
-      case "HALT":
-        return "border-halted text-halted"
+      case "ACCEPTED":
+        return "border-accepted text-accepted"
       case "RUNNING":
         return "border-running text-running"
       case "REJECT":
         return "border-rejected text-rejected"
-      case "VALIDATED": 
+      case "VALIDATED":
         return "border-validated text-validated"
       case "IDLE":
         return "border-idle text-idle"
@@ -315,14 +316,14 @@ export default function Simulator() {
           )}
         </div>
 
-        <div className="max-w-7xl w-full grid md:grid-cols-4 grid-cols-1 gap-6">
-          {/* SIMULATION CONTROLS */}
-          <div className="md:col-span-1 p-4 border-2 border-accent rounded-[0.2em] shadow-lg shadow-accent">
-            <h2 className="text-xl text-accent text-shadow-[0_0_0.5em] text-shadow-accent font-bold mb-4 pb-2 ">
-              Simulation Controls
-            </h2>
+        {/* SIMULATION CONTROLS - Full Width */}
+        <div className="w-full p-4 border-2 border-accent rounded-[0.2em] shadow-lg shadow-accent mb-6">
+          <h2 className="text-xl text-accent text-shadow-[0_0_0.5em] text-shadow-accent font-bold mb-4 pb-2">
+            Simulation Controls
+          </h2>
 
-            <div className="mb-4">
+          <div className="grid md:grid-cols-4 grid-cols-1 gap-4">
+            <div>
               <label className="block text-sm font-medium mb-1 text-foreground">
                 Initial Input Tape
               </label>
@@ -343,7 +344,7 @@ export default function Simulator() {
               </p>
             </div>
 
-            <div className="mb-6">
+            <div>
               <label className="block text-sm font-medium mb-1">
                 Execution Speed (ms)
               </label>
@@ -362,52 +363,62 @@ export default function Simulator() {
               />
             </div>
 
-            <button
-              onClick={handleRun}
-              className={`w-full py-3 px-4 rounded-lg font-bold mb-3 transition-colors duration-300 shadow-md
+            <div className="flex flex-col justify-end gap-2">
+              <button
+                onClick={handleRun}
+                className={`py-3 px-4 rounded-lg font-bold transition-colors duration-300 shadow-md
                 ${
                   simState.status === "RUNNING"
                     ? "bg-yellow-500 hover:bg-yellow-600"
                     : "bg-green-600 hover:bg-green-700"
                 }
               `}
-              disabled={simState.status === "RUNNING"}
-            >
-              {simState.status === "RUNNING" ? "Running..." : "Run Simulation"}
-            </button>
+                disabled={simState.status === "RUNNING"}
+              >
+                {simState.status === "RUNNING"
+                  ? "Running..."
+                  : "Run Simulation"}
+              </button>
+            </div>
 
-            <button
-              onClick={stepSimulation}
-              className={`w-full py-3 px-4 rounded-lg font-bold mb-3 transition-colors duration-300 shadow-md ${
-                simState.status === "RUNNING"
-                  ? "bg-gray-400"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
-              disabled={
-                simState.status !== "VALIDATED" &&
-                simState.status !== "IDLE" &&
-                simState.status !== "RUNNING"
-              }
-            >
-              Step
-            </button>
+            <div className="flex flex-col justify-end gap-2">
+              <button
+                onClick={stepSimulation}
+                className={`py-3 px-4 rounded-lg font-bold transition-colors duration-300 shadow-md ${
+                  simState.status === "RUNNING"
+                    ? "bg-gray-400"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                disabled={
+                  simState.status !== "VALIDATED" &&
+                  simState.status !== "IDLE" &&
+                  simState.status !== "RUNNING"
+                }
+              >
+                Step
+              </button>
+            </div>
+          </div>
 
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-4 mt-4">
             <button
               onClick={handleReset}
-              className="w-full py-3 px-4 rounded-lg font-bold bg-red-500 hover:bg-red-600 transition-colors duration-300 shadow-md"
+              className="py-3 px-4 rounded-lg font-bold bg-red-500 hover:bg-red-600 transition-colors duration-300 shadow-md"
             >
               Reset
             </button>
 
             <button
               onClick={validateTable}
-              className="w-full py-2 px-4 rounded-lg font-semibold mt-4 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-colors duration-300"
+              className="py-2 px-4 rounded-lg font-semibold border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-colors duration-300"
             >
               {validationError ? "Re-Validate Machine" : "Validate Machine"}
             </button>
           </div>
+        </div>
 
-          {/* STATES MANAGEMENT */}
+        <div className="max-w-7xl w-full grid md:grid-cols-3 grid-cols-1 gap-6">
+          {/* STATES MANAGEMENT - 1/3 */}
           <div className="md:col-span-1 p-4 bg-background border-2 shadow-lg shadow-accent border-accent rounded-lg shadow-lg">
             <h2 className="text-xl font-bold mb-4 text-shadow-[0_0_0.5em] text-shadow-accent pb-2 text-accent">
               States & Alphabet
@@ -437,7 +448,10 @@ export default function Simulator() {
               </label>
               <div className="max-h-32 overflow-y-auto pr-2">
                 {allStates.map((state, index) => (
-                  <div key={index} className="flex flex-row items-center mb-2">
+                  <div
+                    key={`${state}-${index}`}
+                    className="flex flex-row items-center mb-2"
+                  >
                     <Input
                       maxLength={8}
                       type="text"
@@ -446,11 +460,10 @@ export default function Simulator() {
                         if (e.target.value.trim() === "") return
                         const newStates = [...states]
                         const oldIndex = states.indexOf(state)
-                        // Update the state array, excluding terminal states
                         newStates[oldIndex] = e.target.value.replace(
                           /[^a-zA-Z0-9]/g,
                           ""
-                        ) // Basic sanitization
+                        )
                         setStates(newStates)
                       }}
                       className="w-full mr-2"
@@ -483,14 +496,17 @@ export default function Simulator() {
               </p>
               <div className="max-h-100% overflow-y-auto pr-2">
                 {symbols.map((symbol, index) => (
-                  <div key={index} className="flex flex-row items-center mb-2">
+                  <div
+                    key={`${symbol}-${index}`}
+                    className="flex flex-row items-center mb-2"
+                  >
                     <Input
                       maxLength={1}
                       type="text"
                       value={symbol}
                       onChange={(e) => {
                         const val = e.target.value.toUpperCase().charAt(0)
-                        if (!val || val === BLANK_SYMBOL) return // Prevent empty or blank symbol
+                        if (!val || val === BLANK_SYMBOL) return
                         const newAlphabet = [...symbols]
                         newAlphabet[index] = val
                         setSymbols(newAlphabet)
@@ -511,15 +527,24 @@ export default function Simulator() {
               </div>
               <button
                 className="bg-indigo-600 border-2 border-indigo-600 py-2 px-4 text-white hover:bg-indigo-700 transition-colors duration-300 w-full rounded-lg mt-2"
-                onClick={() => setSymbols([...symbols, `_`])}
-                disabled={symbols.length >= 5} // Limit for table readability
+                onClick={() => {
+                  const existingSymbols = new Set(symbols)
+                  const candidates = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789"
+                  for (const char of candidates) {
+                    if (!existingSymbols.has(char)) {
+                      setSymbols([...symbols, char])
+                      break
+                    }
+                  }
+                }}
+                disabled={symbols.length >= 10}
               >
                 Add Symbol
               </button>
             </div>
           </div>
 
-          {/* TRANSITION TABLE */}
+          {/* TRANSITION TABLE - 2/3 */}
           <div className="md:col-span-2 p-4 border-2 border-accent rounded-lg shadow-accent shadow-lg overflow-x-auto min-w-0">
             <h2 className="text-xl font-bold mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
               Transition Table $\delta(q, a)$
@@ -544,10 +569,7 @@ export default function Simulator() {
                 </thead>
                 <tbody>
                   {allSymbols.map((symbol) => (
-                    <tr
-                      key={symbol}
-                      className="hover:bg-muted"
-                    >
+                    <tr key={symbol} className="hover:bg-muted">
                       <td className="border border-gray-500 p-2 text-center font-bold">
                         {symbol === BLANK_SYMBOL
                           ? `BLANK (${BLANK_SYMBOL})`
@@ -558,7 +580,6 @@ export default function Simulator() {
                           key={s}
                           className="border border-gray-500 p-2 align-top text-xs space-y-1"
                         >
-                          {/* Each cell contains Write, Next State, Direction */}
                           <div className="font-semibold mb-1">{`Write (${symbol})`}</div>
                           <Input
                             maxLength={1}
@@ -627,7 +648,6 @@ export default function Simulator() {
                       ))}
                     </tr>
                   ))}
-                  {/* Terminal States Row - No transitions needed from these */}
                   <tr className="font-semibold">
                     <td className="border border-gray-500 p-2 text-center">
                       Halted States
